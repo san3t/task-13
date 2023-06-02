@@ -1,0 +1,73 @@
+﻿@page "/goods/{id:int}"
+@inject IProductService ProductService
+
+<MudText Class="align-content-center" Typo="Typo.h6">Старница товара</MudText>
+<MudBreadcrumbs Separator="/" Items="_items"></MudBreadcrumbs>
+<br />
+
+<MudText>Вы на странице товара @Id</MudText>
+
+@if(product != null)
+{
+    <MudText class="align-center" Typo="Typo.h2">@product.ProductName</MudText>
+
+    <MudContainer Class="mb-12">
+        <MudGrid>
+            <MudItem sm="12">
+                <MudPaper Class="pa-4" Elevation="25">
+                    <MudTabs Elevation="0" Centered="true" Rounded="true" PanelClass="pa-6" DisableRipple="true">
+                        <MudTabPanel Text="Данные товара" ToolTip="Первый">
+
+                            <MudText Typo="Typo.h5">Товар: @product.ProductName </MudText>
+                            <MudText Typo="Typo.h5">В наличии: @product.ProductStock штук</MudText>
+                            <button class="btn btn-lg btn-outline-success">Купить за @product.ProductPrice$</button>
+
+                        </MudTabPanel>
+                        <MudTabPanel Text="Описание товара" ToolTip="Второй">
+                            <div class="align-center d-flex" style="height: 60px">
+                                <MudText Typo="Typo.h6">
+                                    @product.ProductDescription
+                                </MudText>
+                            </div>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Отзывы о товаре" ToolTip="Четвертый">
+                            <div class="align-center d-flex" style="height: 60px">
+                                @if (reviews != null)
+                                {
+                                    @foreach (var review in reviews)
+                                    {
+                                        <MudText Typo="Typo.h6">
+                                            @review.ReviewRating: @review.ReviewText
+                                        </MudText>
+                                    }
+                                }
+                            </div>
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private List<BreadcrumbItem> _items = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Главная", href: "/"),
+        new BreadcrumbItem("Товары", href: "products-list")
+    };
+
+    private Product product = null;
+    List<Review> reviews = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await ProductService.GetById(Id);
+        reviews = await ReviewService.GetAllByProductId(Id);
+        Console.WriteLine(reviews);
+        Console.WriteLine(Id);
+    }
+}
